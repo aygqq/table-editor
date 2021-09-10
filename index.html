@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en-us">
-  <head>
+
+<head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta charset="utf-8">
@@ -15,170 +16,114 @@
     <title>Table Editor</title>
 
     <style>
+        body {
+            margin-bottom: 100px;
+            min-width: 285px;
+        }
 
-      body {
-        margin-bottom: 100px;
-        min-width: 285px;
-      }
+        hr {
+            margin-top: 40px;
+        }
 
-      hr {
-        margin-top: 40px;
-      }
+        table td,
+        th {
+            border: 2px solid lightgrey;
+            width: 150px;
+            min-width: 100px;
+            max-width: 300px;
+        }
 
-      table td, th {
-        border: 2px solid lightgrey;
-        width: 75px;
-        min-width: 50px;
-      }
+        .header {
+            text-align: center;
+            background-color: #f0f0f0;
+        }
 
-      .header {
-        text-align: center;
-        background-color: #f0f0f0;
-      }
+        .header:hover {
+            cursor: pointer;
+        }
 
-      .header:hover {
-        cursor: pointer;
-      }
+        .square {
+            border-radius: 0px;
+            border: 0px;
+            width: 100%;
+        }
 
-      .square {
-        border-radius: 0px;
-        border: 0px;
-        width: 100%;
-      }
+        .square:focus {
+            outline: none;
+            box-shadow: none;
+        }
 
-      .square:focus {
-        outline: none;
-        box-shadow: none;
-      }
+        .selected {
+            background-color: #d8ecf3;
+        }
 
-      .selected {
-        background-color: #d8ecf3;
-      }
+        input {
+            background-color: transparent;
+        }
 
-      input {
-        background-color: transparent;
-      }
-
-      .output {
-        width: 100%;
-        height: 250px;
-        resize: none;
-        font-family: monospace;
-        tab-size: 1em;
-        user-select: none;
-        white-space: pre;
-        overflow: scroll;
-        overflow-y: scroll;
-        overflow-x: scroll;
-        overflow:-moz-scrollbars-vertical;
-      }
-
-
+        .output {
+            width: 100%;
+            height: 250px;
+            resize: none;
+            font-family: monospace;
+            tab-size: 1em;
+            user-select: none;
+            white-space: pre;
+            overflow: scroll;
+            overflow-y: scroll;
+            overflow-x: scroll;
+            overflow: -moz-scrollbars-vertical;
+        }
     </style>
 
-  </head>
-  <body>
+</head>
+
+<body>
 
     <div class="container">
-      <div class="row" style="margin-bottom: 30px;">
-        <div class="col-md-12">
-          <h1>Table Editor</h1>
-          <p>Upload a table file and specify table separation delimiters. Then save, edit, and/or export the table.</p>
+        <div class="row" style="margin-bottom: 30px;">
+            <div class="col-md-12">
+                <h1>Table Editor</h1>
+                <p>Upload a table file and specify table separation delimiters. Then save, edit, and/or export the
+                    table.</p>
+            </div>
         </div>
-      </div>
 
-      <h3>1. Load</h3>
-      <br>
-      <div class="row">
-        <div class="col-md-4">
-          <input type='file' class='input' onchange='onChooseFile(event)' />
-          <br>
-          <button id="load" class="btn btn-primary btn-block" onclick="load()" disabled style="margin-bottom: 20px;">Load Table</button>
+        <h3>1. Load</h3>
+        <br>
+        <div class="row">
+            <div class="col-md-4">
+                <input type='file' class='input' onchange='onChooseFile(event)' />
+                <br>
+                <button id="load" class="btn btn-primary btn-block" onclick="load()" disabled
+                    style="margin-bottom: 20px;">Load Table</button>
+            </div>
         </div>
-        <div class="col-md-4">
-          <div class="panel panel-default">
-            <div class="panel-heading">
-              Row Delimiter
-            </div>
-            <div class="panel-body">
-              <label>
-                <input type="radio" name="row-del" value='\n' checked> Newline ("\n")
-              </label><br>
-              <label>
-                <input id="other-row-del-radio" type="radio" name="row-del" value="">
-                Other: <input type="text" id="other-row-del" style="width: 4em"
-                              onclick="document.getElementById('other-row-del-radio').checked = true;"/>
-              </label>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="panel panel-default">
-            <div class="panel-heading">
-              Column Delimiter
-            </div>
-            <div class="panel-body">
-              <label>
-                <input type="radio" name="col-del" value="," checked> Comma (",")
-              </label><br>
-              <label>
-                <input type="radio" name="col-del" value="\t"> Tab ("	")
-              </label><br>
-              <label>
-                <input id="other-col-del-radio" type="radio" name="col-del" value="">
-                Other: <input type="text" name="other-col-del" style="width: 4em"
-                              onclick="document.getElementById('other-col-del-radio').checked = true;"/>
-              </label>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <hr>
-      <h3>2. Edit</h3>
-      <br>
-      <div class="btn-group">
-        <button id="delete" class="btn btn-default" onclick="delete_selected()">
-          <span class="glyphicon glyphicon-minus"></span>
+        <hr>
+        <h3>2. Edit</h3>
+        <br>
+        <div class="btn-group">
+            <button id="delete" class="btn btn-default" onclick="delete_selected()">
+                <span class="glyphicon glyphicon-minus"></span>
+            </button>
+            <button id="insert" class="btn btn-default" onclick="insert_selected()">
+                <span class="glyphicon glyphicon-plus"></span>
+            </button>
+        </div>
+        <button id="add-row" class="btn btn-default" onclick="add_row()">
+            Add Row
         </button>
-        <button id="insert" class="btn btn-default" onclick="insert_selected()">
-          <span class="glyphicon glyphicon-plus"></span>
+        <button id="add-col" class="btn btn-default" onclick="add_column()">
+            Add Column
         </button>
-      </div>
-      <button id="add-row" class="btn btn-default" onclick="add_row()">
-        Add Row
-      </button>
-      <button id="add-col" class="btn btn-default" onclick="add_column()">
-        Add Column
-      </button>
-      <br><br>
-      <table id="contents"></table>
+        <br><br>
+        <table id="contents"></table>
 
-      <hr>
-      <h3>3. Export</h3>
-      <br>
-      <button class="btn btn-primary" style="margin-bottom: 30px" onclick="export_to_all()">
-        <span class="glyphicon glyphicon-export"></span> Export
-      </button>
-      <div class="row">
-        <div class="col-sm-4">
-          <h4>Markdown</h4>
-          <textarea id="export-markdown" class="output" readonly onclick="this.select()"></textarea>
-        </div>
-        <div class="col-sm-4">
-          <h4>LaTeX</h4>
-          <textarea id="export-LaTeX" class="output" readonly onclick="this.select()"></textarea>
-        </div>
-        <div class="col-sm-4">
-          <h4>HTML</h4>
-          <textarea id="export-HTML" class="output" readonly onclick="this.select()"></textarea>
-        </div>
-      </div>
-
-      <hr>
-      <h3>4. Save</h3>
-      <br>
-      <!-- <div class="col-md-4">
+        <hr>
+        <h3>3. Save</h3>
+        <br>
+        <!-- <div class="col-md-4">
         <div class="panel panel-default">
           <div class="panel-heading">
             Row Delimiter
@@ -216,37 +161,20 @@
         </div>
       </div> -->
 
-      <div class="col-md-4">
-        <button class="btn btn-success btn-block" style="margin-bottom: 30px" onclick="save_to_file(format('\n',','))">
-          <span class="glyphicon glyphicon-save"></span> Save CSV
-        </button>
-      </div>
-      <div class="col-md-4">
-        <button class="btn btn-success btn-block" style="margin-bottom: 30px" onclick="save_to_file(format('\n','\t'))">
-          <span class="glyphicon glyphicon-save"></span> Save TSV
-        </button>
-      </div>
-
-      <div class="col-md-4">
-        <div class="input-group" style="margin-bottom: 20px">
-          <span class="input-group-addon">Row Delimiter</span>
-          <input id="other-row-del-out" type="text" class="form-control" onchange="row_del_out=this.value" value=";"/>
+        <div class="col-md-4">
+            <button class="btn btn-success btn-block" style="margin-bottom: 30px"
+                onclick="save_to_file(format('\n',','))">
+                <span class="glyphicon glyphicon-save"></span> Save CSV
+            </button>
         </div>
-        <div class="input-group" style="margin-bottom: 20px">
-          <span class="input-group-addon">Column Delimiter</span>
-          <input id="other-col-del-out" type="text" class="form-control" onchange="col_del_out=this.value" value=",">
-        </div>
-        <button class="btn btn-success btn-block" style="margin-bottom: 30px" onclick="get_rd_cd_out(); save_to_file(format(row_del_out, col_del_out))">
-          <span class="glyphicon glyphicon-save"></span> Save
-        </button>
-      </div>
 
 
 
     </div>
 
 
-  </body>
+</body>
 
-  <script src="js/engine.js"></script>
+<script src="js/engine.js"></script>
+
 </html>
