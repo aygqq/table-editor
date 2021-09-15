@@ -1,4 +1,3 @@
-
 var file;
 
 var text = "";
@@ -22,6 +21,15 @@ initialize_empty();
 
 
 function initialize_empty() {
+    text = "";
+    contents = [[""]];
+    row_del = "\n";
+    col_del = ",";
+    selected = "";
+    
+    while (table.firstChild) {
+        table.removeChild(table.lastChild);
+    }
     var head = document.createElement('tr');
     head.appendChild(create_th("-", ""));
     head.appendChild(create_th('a', 'A'));
@@ -30,6 +38,29 @@ function initialize_empty() {
     clearInterval(intervalId);
     intervalId = setInterval(display_to_contents, 100);
     disable_buttons(true, true, false);
+
+    var api = new RestClient('http://localhost:8080');
+    api.res('file');
+    api.file('get').get().then(function(resfile) {
+        console.log(resfile);
+
+        for (var i in resfile.results) {
+            var line = resfile.results[i];
+            console.log(line);
+            for (var j in line) {
+                console.log(line[j]);
+                if (j > 0) {
+                    text += ",";
+                }
+                text += line[j];
+            }
+            text += "\n";
+        }
+        split_text_to_contents();
+        contents_to_display();
+        deselect();
+        disable_buttons(true, true, false);
+    });
 }
 
 
@@ -106,16 +137,18 @@ function load() {
     //   if (col_del == "") {
     //     col_del = document.getElementById("other-col-del").value;
     //   }
-    col_del = new RegExp(col_del);
-    var fr = new FileReader();
-    fr.onload = function (e) {
-        text = e.target.result;
-        split_text_to_contents();
-        contents_to_display();
-        deselect();
-        disable_buttons(true, true, false);
-    }
-    fr.readAsText(file);
+    // col_del = new RegExp(col_del);
+    // var fr = new FileReader();
+    // fr.onload = function (e) {
+    //     text = e.target.result;
+    //     split_text_to_contents();
+    //     contents_to_display();
+    //     deselect();
+    //     disable_buttons(true, true, false);
+    // }
+    // fr.readAsText(file);
+
+    initialize_empty();
 }
 
 function split_text_to_contents() {
@@ -139,6 +172,26 @@ function split_text_to_contents() {
                 row.push("");
             }
         }
+    }
+}
+
+function split_text_to_json() {
+    var responce = {}
+    var result
+    if (text != "") {
+        var rows = text.split(row_del);
+        num_cols = 0;
+        for (var i in rows) {
+            if (rows[i] != "") {
+                result[i] = rows[i];
+                // var row = rows[i].split(col_del);
+                // for (var j in row) {
+                //     result[i][j] = row[j]
+                // }
+            }
+        }
+        let json = JSON.stringify(result);
+        fs.writeFileSync('output.json', json);
     }
 }
 
@@ -412,16 +465,60 @@ function get_rd_cd_out() {
 }
 
 
-function save_to_file(text) {
+async function save_to_file(text) {
     var name = "";
     // if (file) {
     //     var dot = file.name.lastIndexOf(".");
     //     name += file.name.slice(0, dot) + "_";
     // }
     // name += "PEF_table_editor_file";
-    name = file.name;
+    // name = file.name;
 
-    SaveFile(text, name, "text/plain;charset=utf-8");
+    // SaveFile(text, name, "text/plain;charset=utf-8");
+
+    // var api = new RestClient('http://localhost:8080');
+    // api.res('file');
+    // var results = JSON.stringify(contents);
+    // api.file('set').post({results}).on('request', function(xhr) {
+    //     xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
+    // }).then(function(resfile) {
+    //     console.log(resfile);
+    // }, function(xhr) {
+    //     console.log(xhr);
+    // });
+
+    const url = "http://localhost:8080/file/set";
+    const data = JSON.stringify(contents);
+    const other_params = {
+        headers : { "content-type" : "application/json; charset=UTF-8" },
+        body : data,
+        method : "POST",
+        mode : "no-cors"
+    };
+
+    let response = await fetch(url, other_params);
+
+    if (response.ok) { // если HTTP-статус в диапазоне 200-299
+        // получаем тело ответа (см. про этот метод ниже)
+        let json = await response.json();
+        console.log(json);
+      } else {
+        // alert("Ошибка HTTP: " + response.status);
+      }
+
+        // .then(function(response) {
+        //     if (response.ok) {
+        //         alert(response.json());
+        //     } else {
+        //         throw new Error("Could not reach the API: " + response.statusText);
+        //     }
+        // }).then(function(data) {
+        //     console.log(data.encoded);
+        // }).catch(function(error) {
+        //     console.log(error.message);
+        // });
+
+        load();
 }
 
 

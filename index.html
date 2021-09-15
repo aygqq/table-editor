@@ -9,6 +9,7 @@
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
 
+    <script src="another-rest-client/rest-client.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
     <script src="js/FileSaver.js"></script>
@@ -84,25 +85,21 @@
         <div class="row" style="margin-bottom: 30px;">
             <div class="col-md-12">
                 <h1>Table Editor</h1>
-                <p>Upload a table file and specify table separation delimiters. Then save, edit, and/or export the
-                    table.</p>
+                <p>Позволяет редактировать файл разрешенных телефонных номеров на STM32_MP1.</p>
             </div>
         </div>
 
-        <h3>1. Load</h3>
-        <br>
         <div class="row">
             <div class="col-md-4">
-                <input type='file' class='input' onchange='onChooseFile(event)' />
-                <br>
-                <button id="load" class="btn btn-primary btn-block" onclick="load()" disabled
-                    style="margin-bottom: 20px;">Load Table</button>
+                <button 
+                    id="load" 
+                    class="btn btn-primary btn-block" 
+                    onclick="load()"
+                    style="margin-bottom: 30px;">Load File
+                </button>
             </div>
         </div>
 
-        <hr>
-        <h3>2. Edit</h3>
-        <br>
         <div class="btn-group">
             <button id="delete" class="btn btn-default" onclick="delete_selected()">
                 <span class="glyphicon glyphicon-minus"></span>
@@ -119,53 +116,16 @@
         </button>
         <br><br>
         <table id="contents"></table>
-
-        <hr>
-        <h3>3. Save</h3>
         <br>
-        <!-- <div class="col-md-4">
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            Row Delimiter
-          </div>
-          <div class="panel-body">
-            <label>
-              <input type="radio" name="row-del-out" value='\n' checked> Newline ("\n")
-            </label><br>
-            <label>
-              <input id="other-row-del-out-radio" type="radio" name="row-del-out" value="">
-              Other: <input type="text" id="other-row-out-del" style="width: 4em"
-                            onclick="document.getElementById('other-row-del-out-radio').checked = true;"/>
-            </label>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            Column Delimiter
-          </div>
-          <div class="panel-body">
-            <label>
-              <input type="radio" name="col-del-out" value="," checked> Comma (",")
-            </label><br>
-            <label>
-              <input type="radio" name="col-del-out" value="\t"> Tab ("	")
-            </label><br>
-            <label>
-              <input id="other-col-del-out-radio" type="radio" name="col-del-out" value="">
-              Other: <input type="text" name="other-col-del-out" style="width: 4em"
-                            onclick="document.getElementById('other-col-del-out-radio').checked = true;"/>
-            </label>
-          </div>
-        </div>
-      </div> -->
-
-        <div class="col-md-4">
-            <button class="btn btn-success btn-block" style="margin-bottom: 30px"
-                onclick="save_to_file(format('\n',','))">
-                <span class="glyphicon glyphicon-save"></span> Save CSV
-            </button>
+        <div class="row">
+            <div class="col-md-4">
+                <button 
+                    class="btn btn-success btn-block" 
+                    style="margin-bottom: 30px"
+                    onclick="save_to_file(format('\n',','))">
+                    <span class="glyphicon glyphicon-save"></span> Save File
+                </button>
+            </div>
         </div>
 
 
