@@ -16,8 +16,10 @@ var intervalId;
 var selected = "";
 
 const LETTERS = "abcdefghijklmnopqrstuvwxyz";
+const NAMES = ["Телефон", "Фамилия", "Имя", "Отчество", "Категория", "Доп. инф."]
 var table = document.getElementById("contents");
 initialize_empty();
+get_file();
 
 
 function initialize_empty() {
@@ -38,35 +40,7 @@ function initialize_empty() {
     clearInterval(intervalId);
     intervalId = setInterval(display_to_contents, 100);
     disable_buttons(true, true, false);
-
-    var api = new RestClient('http://localhost:8080');
-    api.res('file');
-    api.file('get').get().then(function(resfile) {
-        console.log(resfile);
-
-        for (var i in resfile.results) {
-            var line = resfile.results[i];
-            console.log(line);
-            for (var j in line) {
-                console.log(line[j]);
-                if (j > 0) {
-                    text += ",";
-                }
-                text += line[j];
-            }
-            text += "\n";
-        }
-        split_text_to_contents();
-        contents_to_display();
-        deselect();
-        disable_buttons(true, true, false);
-    });
 }
-
-
-
-
-
 
 function get_letter(n) {
     n += 1;
@@ -108,47 +82,9 @@ function get_column_widths() {
     return col_widths;
 }
 
-
-
-
-
-
-function onChooseFile(event) {
-    if (typeof window.FileReader !== 'function')
-        throw ("The file API isn't supported on this browser.");
-    let input = event.target;
-    if (!input)
-        throw ("The browser does not properly implement the event object");
-    if (!input.files)
-        throw ("This browser does not support the `files` property of the file input.");
-    if (!input.files[0])
-        return undefined;
-    file = input.files[0];
-    document.getElementById('load').disabled = false;
-}
-
 function load() {
-    //   row_del = document.querySelector('input[name="row-del"]:checked').value;
-    //   if (row_del == "") {
-    //     row_del = document.getElementById("other-row-del").value;
-    //   }
-    //   row_del = new RegExp(row_del);
-    //   col_del = document.querySelector('input[name="col-del"]:checked').value;
-    //   if (col_del == "") {
-    //     col_del = document.getElementById("other-col-del").value;
-    //   }
-    // col_del = new RegExp(col_del);
-    // var fr = new FileReader();
-    // fr.onload = function (e) {
-    //     text = e.target.result;
-    //     split_text_to_contents();
-    //     contents_to_display();
-    //     deselect();
-    //     disable_buttons(true, true, false);
-    // }
-    // fr.readAsText(file);
-
     initialize_empty();
+    get_file();
 }
 
 function split_text_to_contents() {
@@ -175,31 +111,6 @@ function split_text_to_contents() {
     }
 }
 
-function split_text_to_json() {
-    var responce = {}
-    var result
-    if (text != "") {
-        var rows = text.split(row_del);
-        num_cols = 0;
-        for (var i in rows) {
-            if (rows[i] != "") {
-                result[i] = rows[i];
-                // var row = rows[i].split(col_del);
-                // for (var j in row) {
-                //     result[i][j] = row[j]
-                // }
-            }
-        }
-        let json = JSON.stringify(result);
-        fs.writeFileSync('output.json', json);
-    }
-}
-
-
-
-
-
-
 function get_num_data_rows() {
     if (table.childNodes.length == 0) {
         return 0;
@@ -216,10 +127,6 @@ function get_num_data_cols() {
     }
     return table.childNodes[0].childNodes.length - 1;
 }
-
-
-
-
 
 function create_td(id) {
     var td = document.createElement("td");
@@ -250,9 +157,6 @@ function create_row(row_num, length) {
 }
 
 
-
-
-
 function contents_to_display() {
     while (table.firstChild) {
         table.removeChild(table.lastChild);
@@ -260,7 +164,7 @@ function contents_to_display() {
     var head = document.createElement('tr');
     head.appendChild(create_th("-", ""));
     for (var c = 0; c < contents[0].length; c++) {
-        head.appendChild(create_th(get_letter(c), get_letter(c).toUpperCase()));
+        head.appendChild(create_th(get_letter(c), NAMES[c]));
     }
     table.appendChild(head);
     for (var r = 0; r < contents.length; r++) {
@@ -285,23 +189,12 @@ function display_to_contents() {
     }
 }
 
-
-
-
-
-
 function disable_buttons(bool1, bool2, bool3) {
     document.getElementById('delete').disabled = bool1;
     document.getElementById('insert').disabled = bool2;
     document.getElementById('add-row').disabled = bool3;
-    document.getElementById('add-col').disabled = bool3;
+    // document.getElementById('add-col').disabled = bool3;
 }
-
-
-
-
-
-
 
 function has_selection() {
     return selected != null && selected != "" && selected != "-";
@@ -324,13 +217,17 @@ function select_cell(cellID) {
     if (has_selection() && !selected.includes("-")) {
         document.getElementById(selected).classList.add("selected");
         // highlight row or column
-        var squares = document.getElementsByTagName('td');
+        var squares = table.getElementsByTagName('td');
         for (var i = 0; i < squares.length; i++) {
             if (squares[i].firstChild.getAttribute("id").split("-").includes(selected)) {
                 squares[i].classList.add("selected");
             }
         }
-        disable_buttons(isNaN(selected) ? get_num_data_cols() == 1 : get_num_data_rows() == 1, false, false);
+        if (isNaN(selected)) {
+            disable_buttons(true, true, false);
+        } else {
+            disable_buttons(get_num_data_rows() == 1, false, false);
+        }
     }
 }
 
@@ -339,19 +236,12 @@ function select_cell_from_event(e) {
     select_cell(selected);
 }
 
-
-
-
-
-
-
-
 function delete_selected() {
     if (has_selection()) {
         if (isNaN(selected)) {
-            if (get_num_data_cols() > 1) {
-                delete_column(get_number(selected));
-            }
+            // if (get_num_data_cols() > 1) {
+            //     delete_column(get_number(selected));
+            // }
         } else {
             if (get_num_data_rows() > 1) {
                 delete_row(Number(selected));
@@ -410,7 +300,7 @@ function add_column() {
 function insert_selected() {
     if (has_selection()) {
         if (isNaN(selected)) {
-            insert_column(get_number(selected));
+            // insert_column(get_number(selected));
         } else {
             insert_row(selected);
         }
@@ -446,54 +336,49 @@ function insert_column(col) {
     }
 }
 
-
-
-
-
-
-function get_rd_cd_out() {
-    // // row_del_out = document.querySelector('input[name="row-del-out"]:checked').value;
-    // // if (row_del_out == "") {
-    // row_del_out = document.getElementById("other-row-del-out").value;
-    // // }
-    // // row_del_out = new RegExp(row_del_out);
-    // // col_del_out = document.querySelector('input[name="col-del-out"]:checked').value;
-    // // if (col_del_out == "") {
-    // col_del_out = document.getElementById("other-col-del-out").value;
-    // // }
-    // // col_del_out = new RegExp(col_del_out);
+function parse_file(json) {
+    // console.log(json);
+    for (var i in json.results) {
+        var line = json.results[i];
+        // console.log(line);
+        for (var j in line) {
+            // console.log(line[j]);
+            if (j > 0) {
+                text += ",";
+            }
+            text += line[j];
+        }
+        text += "\n";
+    }
+    split_text_to_contents();
+    contents_to_display();
+    deselect();
+    disable_buttons(true, true, false);
 }
 
+function get_file() {
+    // var url = 'http://localhost:8080'
+    var url = 'http://' + window.location.hostname + ':8080'
+    // console.log(url);
+    var api = new RestClient(url);
+    api.res('file');
+    api.file('get').get().then(function(resfile) {
+        parse_file(resfile);
+    });
+}
 
-async function save_to_file(text) {
+async function post_file(text) {
     var name = "";
-    // if (file) {
-    //     var dot = file.name.lastIndexOf(".");
-    //     name += file.name.slice(0, dot) + "_";
-    // }
-    // name += "PEF_table_editor_file";
-    // name = file.name;
 
-    // SaveFile(text, name, "text/plain;charset=utf-8");
-
-    // var api = new RestClient('http://localhost:8080');
-    // api.res('file');
-    // var results = JSON.stringify(contents);
-    // api.file('set').post({results}).on('request', function(xhr) {
-    //     xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
-    // }).then(function(resfile) {
-    //     console.log(resfile);
-    // }, function(xhr) {
-    //     console.log(xhr);
-    // });
-
-    const url = "http://localhost:8080/file/set";
+    // const url = 'http://localhost:8080/file/set'
+    const url = 'http://' + window.location.hostname + ':8080/file/set' 
     const data = JSON.stringify(contents);
     const other_params = {
-        headers : { "content-type" : "application/json; charset=UTF-8" },
-        body : data,
         method : "POST",
-        mode : "no-cors"
+        headers : { 
+            "Content-Type" : "application/json; charset=UTF-8" 
+        },
+        body : data
     };
 
     let response = await fetch(url, other_params);
@@ -501,24 +386,11 @@ async function save_to_file(text) {
     if (response.ok) { // если HTTP-статус в диапазоне 200-299
         // получаем тело ответа (см. про этот метод ниже)
         let json = await response.json();
-        console.log(json);
-      } else {
-        // alert("Ошибка HTTP: " + response.status);
-      }
-
-        // .then(function(response) {
-        //     if (response.ok) {
-        //         alert(response.json());
-        //     } else {
-        //         throw new Error("Could not reach the API: " + response.statusText);
-        //     }
-        // }).then(function(data) {
-        //     console.log(data.encoded);
-        // }).catch(function(error) {
-        //     console.log(error.message);
-        // });
-
-        load();
+        initialize_empty();
+        parse_file(json);
+    } else {
+        alert("Ошибка HTTP: " + response.status);
+    }
 }
 
 

@@ -7,11 +7,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="bootstrap-3.3.7-dist/css/bootstrap.min.css">
 
     <script src="another-rest-client/rest-client.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="jquery/jquery.min.js"></script>
+    <script src="bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
     <script src="js/FileSaver.js"></script>
 
     <title>Table Editor</title>
@@ -111,9 +111,9 @@
         <button id="add-row" class="btn btn-default" onclick="add_row()">
             Add Row
         </button>
-        <button id="add-col" class="btn btn-default" onclick="add_column()">
+        <!-- <button id="add-col" class="btn btn-default" onclick="add_column()">
             Add Column
-        </button>
+        </button> -->
         <br><br>
         <table id="contents"></table>
         <br>
@@ -122,7 +122,7 @@
                 <button 
                     class="btn btn-success btn-block" 
                     style="margin-bottom: 30px"
-                    onclick="save_to_file(format('\n',','))">
+                    onclick="post_file(format('\n',','))">
                     <span class="glyphicon glyphicon-save"></span> Save File
                 </button>
             </div>
