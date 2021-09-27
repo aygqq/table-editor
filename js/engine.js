@@ -34,7 +34,9 @@ function initialize_empty() {
     }
     var head = document.createElement('tr');
     head.appendChild(create_th("-", ""));
-    head.appendChild(create_th('a', 'A'));
+    for (var c = 0; c < 6; c++) {
+        head.appendChild(create_th(get_letter(c), NAMES[c]));
+    }
     table.appendChild(head)
     add_row();
     clearInterval(intervalId);
